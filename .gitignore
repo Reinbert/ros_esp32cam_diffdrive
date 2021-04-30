@@ -4,3 +4,4 @@
 /cmake-build-*/ 
 /.idea/*
 /lib/ros_lib/*
+*.pyc
