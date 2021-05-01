@@ -7,7 +7,7 @@
                 "-DRMW_UXRCE_MAX_SUBSCRIPTIONS=1",
                 "-DRMW_UXRCE_MAX_SERVICES=0",
                 "-DRMW_UXRCE_MAX_CLIENTS=0",
-                "-DRMW_UXRCE_MAX_HISTORY=5",
+                "-DRMW_UXRCE_MAX_HISTORY=1",
             ]
         }
     }
