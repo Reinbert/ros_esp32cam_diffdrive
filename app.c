@@ -29,9 +29,10 @@
 #define SLEEP_TIME 10
 
 // PINS
-#define PIN_LEFT_FORWARD 16
-#define PIN_LEFT_BACKWARD 12
-#define PIN_RIGHT_FORWARD 13
+#define LED_BUILTIN 33
+#define PIN_LEFT_FORWARD 12
+#define PIN_LEFT_BACKWARD 13
+#define PIN_RIGHT_FORWARD 15
 #define PIN_RIGHT_BACKWARD 14
 
 // PWM Channels (Reserve channel 0 and 1 for camera)
@@ -67,6 +68,11 @@ void appMain(void *arg) {
 }
 
 void setupPins() {
+
+    // Led. Set it to GPIO_MODE_INPUT_OUTPUT, because we want to read back the state we set it to.
+    gpio_reset_pin(LED_BUILTIN);
+    gpio_set_direction(LED_BUILTIN, GPIO_MODE_INPUT_OUTPUT);
+
     // Configure timer
     ledc_timer_config_t ledc_timer = {
         .duty_resolution = PWM_RESOLUTION,
@@ -172,6 +178,9 @@ void cmd_vel_callback(const void *msgin) {
 
 // Each frame, check msg data and set PWM channels accordingly
 void timer_callback(rcl_timer_t *timer, int64_t last_call_time) {
+
+    gpio_set_level(LED_BUILTIN, !gpio_get_level(LED_BUILTIN));
+
     if (timer == NULL) {
         return;
     }
