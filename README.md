@@ -1,13 +1,13 @@
 # ros-esp32cam-diffdrive
 
-This is a ROS 2 & Micro-ROS project to control an RC tank with differential drive (skid steering) with an ESP32-CAM module. 
-I'm using an XBox 360 gamepad connected to a PC running *Ubuntu 20.04* and [ROS 2 Foxy](https://docs.ros.org/en/foxy/index.html) as tele operation input. 
-This data is then sent via wifi to an ESP32 microcontroller running [Micro-ROS](https://micro.ros.org/) which transforms the input to PWM signals controlling the 2 motors.
+This is a ROS 2 & micro-ROS project to control an RC tank with differential drive (skid steering) with an ESP32-CAM module. 
+I'm using an XBox 360 gamepad connected to a PC running *Ubuntu 20.04* and [ROS 2 Foxy](https://docs.ros.org/en/foxy/index.html) as teleoperation input. 
+This data is then sent via Wi-Fi to an ESP32-CAM microcontroller running [micro-ROS](https://micro.ros.org/) which transforms the input to PWM signals controlling the 2 motors.
+
 At a later stage, the video of the ESP32-CAM module should be sent back to ROS 2 for further processing or display.
 
-Currently, I'm using an *ESP32-DevKitC WROOM-32D* board which doesn't have a built-in camera, but is slightly easier to handle than an ESP32-CAM module because of built-in buttons and a Micro-USB socket. 
-
-**Note: This is work in progress and doesn't include all features yet.**
+**Note: This is work in progress and doesn't include all features yet. I retested the software and its installation in June 2023 and can confirm that it still works. 
+However, it will probably fail on more recent versions of Ubuntu and ROS2, since the developers now recommend using a [micro-ROS component for ESP-IDF](https://github.com/micro-ROS/micro_ros_espidf_component) on the [micro-ROS *iron* branch](https://github.com/micro-ROS/micro_ros_setup/tree/iron) instead.**
 
 ## ROS 2 & micro-ROS Installation
 
@@ -15,7 +15,7 @@ The first few steps are taken directly from the [micro-ROS Tutorials](https://mi
 (If the instructions depicted here don't work anymore, view the original tutorials for updates and maybe drop me a note.)
 
 Install **ROS 2 Foxy FitzRoy** on your Ubuntu 20.04 LTS computer. I recommend installation via Debian packages, as instructed 
-[here](https://index.ros.org/doc/ros2/Installation/Foxy/Linux-Install-Debians/).
+[here](https://docs.ros.org/en/foxy/Installation/Ubuntu-Install-Debians.html).
 
 Once you have a ROS 2 installation in the computer, follow these steps to install the micro-ROS build system:
 
@@ -78,11 +78,19 @@ ros2 run micro_ros_setup build_firmware.sh
 
 # Connect your ESP32 to the computer and flash the firmware
 ros2 run micro_ros_setup flash_firmware.sh
-# If you encounter a connect loop like this: 
-# 'Connecting........_____.....', you need to manually restart the microcontroller into boot mode. 
-# To do this, connect GPIO 0 to ground while powering on / resetting the module.
-# Other ESP32 boards include designated buttons, labeled 'BOOT': GPIO 0 -> ground and 'EN': reset. 
-# (https://github.com/espressif/esptool/wiki/ESP32-Boot-Mode-Selection)
+```
+If you encounter a connection timeout like this:
+`Connecting........_____.....`, you need to manually restart the microcontroller into boot mode. 
+To do this, connect GPIO 0 to ground while powering on or resetting the module.
+Other ESP32 boards may include designated buttons labeled `'BOOT': GPIO 0 -> ground` or `'EN': reset`. 
+(https://github.com/espressif/esptool/wiki/ESP32-Boot-Mode-Selection)
+
+
+If you get an error during flashing like `Permission denied: '/dev/ttyUSB0` you may need to add your ubuntu user to the `dialout` group. You can do so by entering the following command into the terminal. A reboot / re-login may be required.
+
+```bash
+# Add your username to the 'dialout' group to allow access to USB devices (remove all _). 
+sudo adduser _username_ dialout
 ```
 
 ## Testing the ROS2 connection
@@ -133,7 +141,7 @@ If you have a gamepad, you can use it to control the robot more elegantly:
 ros2 launch teleop_twist_joy teleop-launch.py joy_config:='xbox'
 ```
 
-Since I have an XBox 360 gamepad at home and I'm not fond of pressing an *enable_button*, I wrote my own launch file which is included in this repository as well. 
+Since I have an XBox 360 gamepad at home, and I'm not fond of pressing an *enable_button*, I wrote my own launch file which is included in this repository as well. 
 You can launch it by `cd`-ing into the directory and launching it directly, without the hassle of creating a package first.
 (Drop me a note if you have a different gamepad and want to add its configuration here.)
 
@@ -153,8 +161,8 @@ This also means, that I don't have a fully functioning IDE with code completion 
 You can definitely see that in the code ;)
 So I'm trying to figure out how get all those IDE features back while still being able to build a micro-ROS app. 
  
-Another step will be the use of a real ESP32-CAM module as stated in the name of the repo and making use of the camera. 
-I guess, there are some extra firmware configurations needed to enable the camera and the PSRam of the board. 
+Another step will be the incorporation of the built-in camera of the ESP32-CAM module as stated in the name of the repo. 
+I guess, there are some extra firmware configurations needed to enable the camera and the onboard PSRam.
 
 Additionally, I'm not satisfied with the calculation of the left and right motor values, as the current configuration only outputs 50% of max speed when going forward. 
 Some smarter mathematics with focus on fun instead of precise movement are needed, since the robot doesn't measure the wheel rotations or odometry anyway. Current calculation:
